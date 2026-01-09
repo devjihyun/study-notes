@@ -1,0 +1,13 @@
+:root {
+  --vp-c-brand-1: #6366f1;
+  --vp-c-brand-2: #818cf8;
+  --vp-c-brand-3: #c7d2fe;
+}
+
+:root {
+  --vp-font-family-base: "Pretendard", system-ui;
+}
+
+.dark {
+  --vp-c-brand-1: #38bdf8;
+}

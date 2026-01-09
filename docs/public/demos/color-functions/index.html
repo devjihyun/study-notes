@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Modern CSS Colors Guide</title>
+    <style>
+      /* =========================
+       0. 기본 설정
+       ========================= */
+      :root {
+        color-scheme: light dark; /* OS 다크모드 연동 힌트 */
+
+        /* 0-1. 기본 베이스 컬러 (디자인 토큰처럼 사용) */
+        --primary-base: #2563eb; /* 브랜드 기본색 */
+        --accent-base: #ec4899; /* 보조 포인트 색 */
+        --primary: var(--primary-base); /* sRGB 기본값 */
+        --mix-space-ui: srgb-linear; /* UI 배경/보더 혼합 공간 */
+
+        --surface-base-light: #f5f5f5;
+        --surface-base-dark: #111827;
+        --text-base-light: #0f172a;
+        --text-base-dark: #e5e7eb;
+
+        /* 0-2. light-dark() 지원 전 폴백 (기본 Light) */
+        --surface: var(--surface-base-light);
+        --text: var(--text-base-light);
+
+        /* 0-3. oklch() 미지원 브라우저 대비 기본 HEX */
+        --primary-oklch: var(--primary-base);
+      }
+
+      /* prefers-color-scheme 폴백 */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --surface: var(--surface-base-dark);
+          --text: var(--text-base-dark);
+        }
+      }
+
+      /* 사용자 토글로 강제 전환 */
+      body[data-theme="light"] {
+        --surface: var(--surface-base-light);
+        --text: var(--text-base-light);
+      }
+      body[data-theme="dark"] {
+        --surface: var(--surface-base-dark);
+        --text: var(--text-base-dark);
+      }
+      /* light-dark() 지원 시 토큰을 덮어씌움 */
+      @supports (color: light-dark(white, black)) {
+        :root {
+          --surface: light-dark(
+            var(--surface-base-light),
+            var(--surface-base-dark)
+          );
+          --text: light-dark(var(--text-base-light), var(--text-base-dark));
+        }
+      }
+
+      /* oklch() 지원 시 더 안정적인 대비 값으로 교체 */
+      @supports (color: oklch(0 0 0)) {
+        :root {
+          --primary-oklch: oklch(0.65 0.13 260); /* 대비 안정적인 OKLCH 예시 */
+        }
+      }
+
+      /* P3 환경에서 더 선명한 색 사용 (sRGB 폴백 위에 덮음) */
+      @supports (color: color(display-p3 0.33 0.54 0.96)) {
+        :root {
+          --primary: color(display-p3 0.33 0.54 0.96);
+        }
+      }
+
+      /* 전체 레이아웃 / 타이포 기본 */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: var(--surface);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 16px;
+        max-width: 1340px; /* 왼쪽 컨텐츠(960) + 사이드(260) + 여백 보장 */
+        margin: 32px auto 64px;
+        padding: 0 16px;
+        justify-content: center;
+      }
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 32px 0 0;
+      }
+      .control-panel {
+        position: sticky;
+        top: 16px;
+        align-self: start;
+        display: grid;
+        gap: 12px;
+      }
+      .control-panel h3 {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.8;
+      }
+      h1,
+      h2,
+      h3 {
+        line-height: 1.3;
+        margin: 0 0 0.5em;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin-top: 2.4rem;
+      }
+      h3 {
+        font-size: 1.15rem;
+        margin-top: 1.4rem;
+      }
+      p {
+        margin: 0 0 0.75em;
+        font-size: 0.95rem;
+      }
+      code {
+        font-family: "SFMono-Regular", Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9rem;
+        padding: 0.1em 0.25em;
+        border-radius: 4px;
+        background: color-mix(
+          in var(--mix-space-ui),
+          var(--surface) 76%,
+          var(--text) 24%
+        );
+      }
+      pre {
+        margin: 0.75em 0;
+        padding: 0.9em 1em;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        background: color-mix(
+          in var(--mix-space-ui),
+          var(--surface) 82%,
+          var(--text) 18%
+        );
+      }
+
+      /* 섹션 카드 공통 스타일 */
+      .section-card {
+        margin-top: 1.5rem;
+        padding: 1.25rem 1.35rem;
+        border-radius: 12px;
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 72%, var(--text) 28%);
+        background: color-mix(
+          in var(--mix-space-ui),
+          var(--surface) 88%,
+          var(--text) 12%
+        );
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.15rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        background: color-mix(in srgb, var(--primary) 15%, var(--surface) 85%);
+        color: var(--primary);
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 0.4rem 0 0;
+      }
+      .control-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: color-mix(in var(--mix-space-ui), var(--surface) 88%, var(--text) 12%);
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 72%, var(--text) 28%);
+        border-radius: 999px;
+        padding: 6px 8px;
+      }
+      .control-label {
+        font-size: 0.82rem;
+        opacity: 0.8;
+        padding: 0 4px;
+      }
+      .control-input {
+        appearance: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 72%, var(--text) 28%);
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+      }
+      .control-btn {
+        border: none;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        padding: 6px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+      }
+      .control-btn[aria-pressed="true"] {
+        background: color-mix(in srgb, var(--primary) 18%, var(--surface) 82%);
+        color: var(--primary);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
+      }
+      /* 정보 레이아웃 */
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 0.6rem;
+      }
+      .info-card {
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        border: 1px solid
+          color-mix(in srgb-linear, var(--surface) 78%, var(--text) 22%);
+        background: color-mix(
+          in srgb-linear,
+          var(--surface) 90%,
+          var(--text) 10%
+        );
+      }
+      .info-card strong {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.95rem;
+      }
+      .info-card small {
+        display: block;
+        opacity: 0.8;
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+      .support-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+        display: grid;
+        gap: 0.35rem;
+      }
+      .support-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.9rem;
+      }
+      .dot-ok {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #16a34a;
+        box-shadow: 0 0 0 4px color-mix(in srgb, #16a34a 20%, transparent);
+      }
+      .dot-mid {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #f59e0b;
+        box-shadow: 0 0 0 4px color-mix(in srgb, #f59e0b 20%, transparent);
+      }
+      .support-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        background: color-mix(in srgb, var(--text) 10%, var(--surface) 90%);
+        color: var(--text);
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 78%, var(--text) 22%);
+        margin-left: 0.4rem;
+      }
+      .contrast-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 0.4rem;
+      }
+      .contrast-tag {
+        font-size: 0.78rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--text) 12%, var(--surface) 88%);
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 75%, var(--text) 25%);
+      }
+
+      /* =========================
+       1. 새로운 rgb/hsl 문법
+       ========================= */
+      .color-demo-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 0.75rem;
+      }
+      .swatch {
+        flex: 1 1 120px;
+        min-width: 120px;
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        color: #f9fafb;
+        font-size: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .swatch small {
+        opacity: 0.8;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+      }
+      .swatch-rgb {
+        background: rgb(37 99 235); /* 새 rgb 문법 */
+      }
+      .swatch-rgba {
+        background: rgb(37 99 235 / 0.7); /* alpha는 슬래시로 */
+      }
+      .swatch-hsl {
+        background: hsl(221 83% 53%);
+      }
+      .swatch-hsla {
+        background: hsl(221 83% 53% / 0.7);
+      }
+      .swatch-p3 {
+        background: color(display-p3 0.33 0.54 0.96);
+        position: relative;
+      }
+      body[data-p3="off"] .swatch-p3 {
+        background: #2563eb;
+      }
+      .swatch-p3-label {
+        font-weight: 600;
+      }
+
+      /* =========================
+       2. Relative colours (from)
+       ========================= */
+      :root {
+        /* primary-base에서 파생된 색상들 */
+        --primary-soft: hsl(from var(--primary-base) h s calc(l + 10));
+        --primary-strong: hsl(from var(--primary-base) h s calc(l - 8));
+        --primary-ghost-border: color-mix(
+          in srgb,
+          var(--primary-base) 40%,
+          transparent
+        );
+      }
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 0.85rem;
+      }
+      .btn {
+        border-radius: 999px;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: default;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+      }
+      .btn-solid {
+        background: var(--primary-base);
+        color: #f9fafb;
+      }
+      .btn-soft {
+        background: var(--primary-soft);
+        color: #f9fafb;
+      }
+      .btn-strong {
+        background: var(--primary-strong);
+        color: #f9fafb;
+      }
+      .btn-ghost {
+        background: color-mix(in srgb, var(--primary-base) 12%, transparent);
+        color: var(--primary-base);
+        border-color: var(--primary-ghost-border);
+      }
+
+      /* =========================
+       3. Light / Dark surface 레벨
+       ========================= */
+      .surface-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin-top: 0.9rem;
+      }
+      .surface-card {
+        border-radius: 10px;
+        padding: 0.85rem 0.9rem;
+        font-size: 0.85rem;
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 78%, var(--text) 22%);
+      }
+
+      /* Light/Dark + relative lightness */
+      .surface-1 {
+        background: var(--surface);
+      }
+      .surface-2 {
+        background: color-mix(in srgb, var(--surface) 92%, white);
+      }
+      .surface-3 {
+        background: color-mix(in srgb, var(--surface) 88%, white);
+      }
+      @supports (color: hsl(from white h s l)) {
+        .surface-2 {
+          background: hsl(from var(--surface) h s calc(l + 4));
+        }
+        .surface-3 {
+          background: hsl(from var(--surface) h s calc(l + 8));
+        }
+      }
+
+      /* =========================
+       4. OKLCH + 대비를 의식한 버튼
+       ========================= */
+      .oklch-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 0.85rem;
+      }
+      .btn-oklch {
+        background: var(--primary-oklch);
+        color: #ffffff;
+        border-radius: 999px;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.85rem;
+        border: none;
+        cursor: default;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .btn-oklch:hover {
+        /* 인지 밝기 기준으로 조금 더 밝게 */
+        background: oklch(from var(--primary-oklch) calc(l + 0.06) c h);
+      }
+      .oklch-note {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-top: 0.4rem;
+      }
+
+      /* =========================
+       5. color-mix() 예시
+       ========================= */
+      .mix-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 0.85rem;
+      }
+      .pill {
+        border-radius: 999px;
+        padding: 0.35rem 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+      }
+      .pill-strong {
+        background: var(--accent-base);
+        color: #f9fafb;
+      }
+      .pill-muted {
+        background: color-mix(in srgb, var(--accent-base) 50%, gray);
+        color: #f9fafb;
+      }
+      .pill-soft {
+        background: color-mix(in srgb, var(--accent-base) 18%, white);
+        color: #9f1239;
+      }
+      .pill-soft-linear {
+        background: color-mix(
+          in srgb-linear,
+          var(--accent-base) 18%,
+          white
+        );
+        color: #7f0f2f;
+      }
+      .mix-note {
+        font-size: 0.82rem;
+        opacity: 0.8;
+        margin-top: 0.35rem;
+      }
+      .copy-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.35rem;
+      }
+      .copy-btn {
+        border: 1px solid
+          color-mix(in var(--mix-space-ui), var(--surface) 78%, var(--text) 22%);
+        background: color-mix(in var(--mix-space-ui), var(--surface) 90%, var(--text) 10%);
+        color: inherit;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 140ms ease, border-color 140ms ease;
+      }
+      .copy-btn:active {
+        transform: translateY(1px);
+      }
+      .checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0.6rem 0 0;
+        display: grid;
+        gap: 0.35rem;
+      }
+      .checklist li {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .checklist input {
+        width: 16px;
+        height: 16px;
+      }
+      .refs {
+        margin-top: 0.8rem;
+        display: grid;
+        gap: 0.4rem;
+      }
+      .refs a {
+        color: inherit;
+      }
+      .change-list {
+        margin: 0.5rem 0 0;
+        padding-left: 1.1rem;
+        font-size: 0.95rem;
+      }
+      .change-list li {
+        margin-bottom: 0.25rem;
+      }
+
+      /* 푸터 메모 */
+      .footer-note {
+        margin-top: 2.4rem;
+        padding-top: 1.2rem;
+        border-top: 1px solid
+          color-mix(in srgb, var(--surface) 60%, var(--text) 40%);
+        font-size: 0.8rem;
+        opacity: 0.8;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .control-panel {
+          position: static;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+      }
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+        .page {
+          padding-top: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="layout">
+        <div class="page">
+          <header>
+            <h1>Modern CSS Colors – 실무 가이드</h1>
+            <p>
+              이 파일은 <code>rgb()/hsl()</code> 새 문법, <code>light-dark()</code>,
+              <code>relative colours</code>, <code>oklch()</code>,
+              <code>color-mix()</code>를 한 번에 테스트할 수 있는 가이드입니다.<br />
+              디자인 토큰을 가정하고, 실제 버튼/배지/카드 같은 UI에 어떻게
+              적용되는지 보여줍니다.
+            </p>
+          </header>
+          <div class="section-card">
+            <span class="badge">00 · Next‑gen Changes</span>
+            <h2>차세대 CSS 컬러 문법 한눈에 보기</h2>
+            <ul class="change-list">
+              <li><code>rgb()</code>/<code>hsl()</code> 쉼표 제거, 투명도는 <code>/</code> 슬래시로 표기. <code>rgba()</code>/<code>hsla()</code>는 별도 필요 없음.</li>
+              <li>상대 색상 <code>hsl(from ...)</code>으로 밝기/채도만 수정해 팔레트 파생.</li>
+              <li><code>light-dark()</code>로 Light/Dark를 한 변수에 저장(MDN 기준: Chromium 124+, Safari 16.4+, Firefox 120+). 폴백은 여전히 권장.</li>
+              <li><code>color-mix()</code>는 색 공간 지정 권장. <code>in srgb</code>는 감마 공간이라 밝기 손실이 있고, UI에서는 <code>in srgb-linear</code>가 밝기/대비를 더 잘 유지.</li>
+              <li><code>oklch()</code>로 균일한 밝기·채도 관리, 구형 브라우저엔 HEX 한 줄 폴백.</li>
+              <li><code>color(display-p3 ...)</code>로 P3 광색역 토큰을 <code>@supports</code>로 덮어쓰기.</li>
+            </ul>
+          </div>
+
+      <!-- 0-1. 개념 요약 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">01 · Concepts</span>
+          <h2>핵심 색상 함수 개념 빠르게 훑어보기</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>rgb(), hsl()</strong>
+              <small>쉼표 없이 공백으로 적고, 투명도는 <code>/</code>로 표현합니다. 토큰 기반으로 가장 폭넓게 쓰는 기본 색 함수.</small>
+              <small>Tip: 채도/명도만 바꿀 땐 HSL을 우선 사용하고, RGB는 원본 토큰 유지용으로만 씁니다.</small>
+            </div>
+            <div class="info-card">
+              <strong>Relative colours (from)</strong>
+              <small>기본색 하나에서 <code>hsl(from ...)</code>으로 밝기/채도만 조정해 일관된 팔레트를 만듭니다.</small>
+              <small>Tip: 버튼 밝게는 <code>l + 8~12%</code>, 어둡게는 <code>l - 6~10%</code> 범위부터 시도하면 무난합니다.</small>
+              <small>Note: <code>calc(l + 10)</code>처럼 델타는 % 없이 숫자(0~100)로 쓰는 CSS Color 4 문법입니다.</small>
+            </div>
+            <div class="info-card">
+              <strong>light-dark()</strong>
+              <small>하나의 변수에 Light/Dark 값을 같이 넣는 신문법. 미지원 브라우저를 위해 media query나 기본값 폴백이 필수입니다.</small>
+              <small>Tip: 토큰 선언에 기본(Light)을 먼저 두고, <code>@media (prefers-color-scheme)</code> + <code>@supports (color: light-dark(...))</code>로 순차 덮어쓰기 패턴을 유지하세요.</small>
+              <small>Note: Firefox 120+ 포함 주요 브라우저에서 지원됩니다. 그래도 폴백은 유지하세요.</small>
+            </div>
+            <div class="info-card">
+              <strong>oklch()</strong>
+              <small>체감 밝기가 균일한 색 공간. 대비(WCAG) 맞추기 쉽지만 구버전 브라우저는 무시하므로 HEX 폴백을 함께 적습니다.</small>
+              <small>Tip: 일반 버튼은 <code>l 0.6~0.68</code>, 강조는 <code>l 0.64~0.7</code>에 <code>c 0.12~0.16</code>을 우선 테스트하세요.</small>
+              <small>Note: L은 0~1, C는 0~0.4가 일반적이며 sRGB HEX를 한 줄 더 두어 폴백을 보강하세요.</small>
+            </div>
+            <div class="info-card">
+              <strong>color-mix()</strong>
+              <small>두 색을 비율로 섞습니다. <code>srgb</code>와 <code>srgb-linear</code> 결과가 다르니 UI 대비에 맞춰 선택합니다.</small>
+              <small>Tip: 소프트 톤은 <code>기준색 12~20%</code> + 흰색, 뮤트는 <code>기준색 45~55%</code> + 회색으로 시작하면 안정적입니다.</small>
+              <small>Note: 색 공간 인자는 권장입니다. <code>in srgb</code>는 감마 공간이라 밝은 톤을 섞으면 어둡게 눌리고, <code>in srgb-linear</code>는 빛을 직접 섞은 결과처럼 밝기가 유지돼 배경/보더/hover에 더 자연스럽습니다.</small>
+            </div>
+            <div class="info-card">
+              <strong>display-p3</strong>
+              <small>광색역(Color P3) 값으로 sRGB보다 넓은 색을 표현합니다. sRGB를 기본값으로 두고 <code>@supports (color: color(display-p3 ...))</code>에서만 덮어쓰는 패턴이 안전합니다.</small>
+              <small>Tip: sRGB HEX를 먼저 두고, P3는 <code>color(display-p3 r g b)</code>에서 r/g/b를 0~1 범위로 5~10% 높여 더 생동감 있게 보정합니다.</small>
+              <small>Note: r/g/b는 0~1 실수이며 sRGB 토큰과 병렬 선언(<code>--primary</code> → sRGB, <code>@supports</code> 안에서 P3)으로 관리합니다.</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 0-2. 브라우저 지원 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">02 · Support</span>
+          <h2>브라우저 지원 및 폴백 가이드</h2>
+          <ul class="support-list">
+            <li class="support-item">
+              <span class="dot-ok" aria-hidden="true"></span>
+              <span><strong>rgb()/hsl() 새 문법</strong> — Chromium 111+, Firefox 117+, Safari 15.4+ (대부분 지원). MDN:
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb" target="_blank" rel="noreferrer">rgb()</a>,
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl" target="_blank" rel="noreferrer">hsl()</a></span>
+            </li>
+            <li class="support-item">
+              <span class="dot-mid" aria-hidden="true"></span>
+              <span><strong>light-dark()</strong> — MDN 기준: Chromium 124+, Safari 16.4+, Firefox 120+. 폴백으로 기본값 + <code>@media (prefers-color-scheme)</code> 추천. MDN:
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark" target="_blank" rel="noreferrer">light-dark()</a></span>
+            </li>
+            <li class="support-item">
+              <span class="dot-mid" aria-hidden="true"></span>
+              <span><strong>oklch()</strong> — Chromium 111+, Firefox 113+, Safari 16.0+. 미지원에서는 HEX 재정의가 필요. MDN:
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch" target="_blank" rel="noreferrer">oklch()</a></span>
+            </li>
+            <li class="support-item">
+              <span class="dot-mid" aria-hidden="true"></span>
+              <span><strong>color-mix()</strong> — Chromium 111+, Firefox 117+, Safari 16.2+. 선형 혼합(<code>srgb-linear</code>)까지 함께 테스트. MDN:
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix" target="_blank" rel="noreferrer">color-mix()</a></span>
+            </li>
+            <li class="support-item">
+              <span class="dot-mid" aria-hidden="true"></span>
+              <span><strong>display-p3 색상</strong> — WebKit/Chromium의 최신 버전에서 지원. sRGB 값을 먼저 두고 <code>@supports (color: color(display-p3 ...))</code>로 덮어씌우세요. MDN:
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color#display-p3" target="_blank" rel="noreferrer">display-p3</a></span>
+            </li>
+          </ul>
+          <pre><code>/* 최소 폴백 패턴 */
+:root { --primary: #2563eb; --primary-oklch: #2563eb; }
+@supports (color: oklch(0 0 0)) { :root { --primary-oklch: oklch(0.65 0.13 260); } }
+@supports (color: color(display-p3 0.33 0.54 0.96)) { :root { --primary: color(display-p3 0.33 0.54 0.96); } }
+@media (prefers-color-scheme: dark) { :root { --surface: #111827; --text: #e5e7eb; } }
+@supports (color: light-dark(white, black)) { :root { --surface: light-dark(#f5f5f5, #111827); --text: light-dark(#0f172a, #e5e7eb); } }</code></pre>
+        </div>
+      </section>
+
+      <!-- 1. 새 rgb/hsl 문법 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">03 · New rgb/hsl Syntax</span>
+          <h2>
+            쉼표 없는 rgb/hsl + alpha 슬래시
+            <span class="support-badge">Chrome 111+ · Safari 15.4+</span>
+          </h2>
+          <p>
+            최신 CSS에서는 <code>rgb(…)</code>, <code>hsl(…)</code> 함수에 쉼표
+            대신 공백을 사용하고, 투명도는 <code>/</code>로 정의합니다.
+          </p>
+
+              <div class="color-demo-row" aria-label="새로운 rgb/hsl 문법 예시">
+                <div class="swatch swatch-rgb">
+                  <div>rgb(37 99 235)</div>
+                  <small>기본 rgb</small>
+                </div>
+            <div class="swatch swatch-rgba">
+              <div>rgb(37 99 235 / 0.7)</div>
+              <small>alpha 포함</small>
+            </div>
+            <div class="swatch swatch-hsl">
+              <div>hsl(221 83% 53%)</div>
+              <small>HSL</small>
+            </div>
+                <div class="swatch swatch-hsla">
+                  <div>hsl(221 83% 53% / 0.7)</div>
+                  <small>HSL + alpha</small>
+                </div>
+                <div class="swatch swatch-p3" aria-live="polite">
+                  <div class="swatch-p3-label">color(display-p3 …)</div>
+                  <small>P3 지원 브라우저</small>
+                </div>
+              </div>
+
+              <pre id="rgb-code"><code>/* 예시 */
+.button {
+  background: rgb(37 99 235 / 0.9);
+}
+.badge {
+  background: hsl(221 83% 53% / 0.12);
+  color: hsl(221 83% 25%);
+}
+.pill {
+  background: rgb(30 64 175 / 0.1); /* 쉼표 없이, alpha는 슬래시 */
+  color: hsl(221 83% 25%);
+}
+.pill-p3 {
+  background: color(display-p3 0.22 0.42 0.95 / 0.12); /* sRGB보다 넓은 P3 샘플 */
+  color: hsl(221 83% 25%);
+}</code></pre>
+          <div class="copy-row">
+            <button class="copy-btn" data-copy="#rgb-code">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Relative colours -->
+      <section>
+        <div class="section-card">
+          <span class="badge">04 · Relative Colours</span>
+          <h2>
+            기본 색 하나로 팔레트 확장하기 (from)
+            <span class="support-badge">Chrome 111+ · Safari 15.4+</span>
+          </h2>
+          <p>
+            <code>hsl(from …)</code> 문법을 사용하면, 기본색
+            <code>--primary-base</code> 하나만 정의하고<br />
+            밝은/어두운/고스트 버튼을 모두 같은 색에서 파생시킬 수 있습니다.
+          </p>
+
+          <div class="btn-row">
+            <span class="btn btn-solid">Primary</span>
+            <span class="btn btn-soft">Primary · Soft</span>
+            <span class="btn btn-strong">Primary · Strong</span>
+            <span class="btn btn-ghost">Primary · Ghost</span>
+          </div>
+          <div class="contrast-row" aria-label="버튼 대비값">
+            <span class="contrast-tag">Primary/white · 5.17:1</span>
+            <span class="contrast-tag">Strong/white · 6.65:1</span>
+          </div>
+
+          <pre id="rel-code"><code>:root {
+  --primary-base: #2563eb;
+
+  /* 기본 파생 (relative color) */
+  --primary-soft:   hsl(from var(--primary-base) h s calc(l + 10));
+  --primary-strong: hsl(from var(--primary-base) h s calc(l - 8));
+}
+@supports not (color: hsl(from white h s l)) {
+  :root {
+    --primary-soft: color-mix(in srgb, var(--primary-base) 88%, white);
+    --primary-strong: color-mix(in srgb, var(--primary-base) 92%, black);
+  }
+}
+
+/* 버튼 스타일 */
+.btn-solid {
+  background: var(--primary-base);
+  color: #f9fafb;
+}
+.btn-soft {
+  background: var(--primary-soft);
+  color: #f9fafb;
+}
+.btn-strong {
+  background: var(--primary-strong);
+  color: #f9fafb;
+}
+.btn-ghost {
+  background: color-mix(in srgb, var(--primary-base) 12%, transparent);
+  color: var(--primary-base);
+}</code></pre>
+          <div class="copy-row">
+            <button class="copy-btn" data-copy="#rel-code">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Light/Dark surface levels -->
+      <section>
+        <div class="section-card">
+          <span class="badge">05 · Light/Dark Surfaces</span>
+          <h2>
+            Light/Dark 테마 + 표면 레벨(surface level)
+            <span class="support-badge">Chrome 124+ · Safari 16.4+</span>
+          </h2>
+          <p>
+            <code>light-dark()</code>로 하나의 변수에 Light/Dark 값을 모두
+            넣고,<br />
+            relative lightness로 레벨 1, 2, 3 같은 표면을 만들 수 있습니다.
+          </p>
+
+          <div class="surface-grid" aria-label="서피스 레벨 예시">
+            <div class="surface-card surface-1">
+              <strong>Surface 1</strong>
+              <p>기본 배경 (var(--surface))</p>
+            </div>
+            <div class="surface-card surface-2">
+              <strong>Surface 2</strong>
+              <p>Surface보다 약간 더 밝은 카드</p>
+            </div>
+            <div class="surface-card surface-3">
+              <strong>Surface 3</strong>
+              <p>모달/툴팁 등의 상위 레벨에 사용</p>
+            </div>
+          </div>
+
+          <pre id="surface-code"><code>:root {
+  --surface-base-light: #f5f5f5;
+  --surface-base-dark:  #111827;
+
+  --surface: light-dark(var(--surface-base-light),
+                       var(--surface-base-dark));
+}
+
+.surface-1 {
+  background: var(--surface);
+}
+.surface-2 {
+  background: hsl(from var(--surface) h s calc(l + 4));
+}
+.surface-3 {
+  background: hsl(from var(--surface) h s calc(l + 8));
+}</code></pre>
+          <div class="copy-row">
+            <button class="copy-btn" data-copy="#surface-code">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. OKLCH -->
+      <section>
+        <div class="section-card">
+          <span class="badge">06 · OKLCH</span>
+          <h2>
+            시각적으로 균일한 밝기 조정 (oklch)
+            <span class="support-badge">Chrome 111+ · Safari 16.0+</span>
+          </h2>
+          <p>
+            <code>oklch()</code>는 색상마다 체감 밝기가 달라지는 문제를 완화해
+            줍니다.<br />
+            텍스트 대비(WCAG 4.5:1)를 안정적으로 맞추고 싶을 때 유용합니다.
+          </p>
+
+          <div class="oklch-row">
+            <button type="button" class="btn-oklch">
+              OKLCH Primary (hover로 밝기 ↑)
+            </button>
+          </div>
+          <p class="oklch-note">
+            ※ 오래된 브라우저에서는 <code>oklch()</code>가 무시될 수 있으니
+            필요하면 HEX를 한 줄 더 두어 fallback으로 사용하세요.
+          </p>
+
+          <pre id="oklch-code"><code>:root {
+  /* 대비를 고려한 OKLCH 값 */
+  --primary-oklch: oklch(0.65 0.13 260);
+}
+
+.button {
+  background: var(--primary-oklch); /* 텍스트는 흰색 권장 */
+  color: #ffffff;
+}
+.button:hover {
+  background: oklch(from var(--primary-oklch) calc(l + 0.06) c h);
+}</code></pre>
+          <div class="copy-row">
+            <button class="copy-btn" data-copy="#oklch-code">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. color-mix -->
+      <section>
+        <div class="section-card">
+          <span class="badge">07 · color-mix()</span>
+          <h2>
+            브랜드 색과 회색/흰색 섞어서 상태별 톤 만들기
+            <span class="support-badge">Chrome 111+ · Safari 16.2+</span>
+          </h2>
+          <p>
+            <code>color-mix()</code>를 사용하면 포토샵처럼 색을 비율로 섞을 수
+            있습니다.<br />
+            브랜드 컬러에서 강한/Muted/Soft 상태를 만들 때 유용합니다.
+          </p>
+
+          <div class="mix-row">
+            <span class="pill pill-strong">Accent Strong</span>
+            <span class="pill pill-muted">Accent Muted</span>
+          </div>
+          <div class="mix-row">
+            <span class="pill pill-soft">Soft · srgb</span>
+            <span class="pill pill-soft-linear">Soft · srgb-linear</span>
+          </div>
+          <p class="mix-note">
+            아래는 동일한 비율에서 <code>srgb</code> vs <code>srgb-linear</code>
+            결과를 나란히 보여줍니다. srgb-linear은 선형 공간에서 섞여 더
+            자연스럽게 밝아집니다.
+          </p>
+
+          <pre id="mix-code"><code>:root {
+  --accent-base: #ec4899;
+}
+
+.badge-strong {
+  background: var(--accent-base);
+  color: #f9fafb;
+}
+.badge-muted {
+  background: color-mix(in srgb, var(--accent-base) 50%, gray);
+  color: #f9fafb;
+}
+.badge-soft {
+  background: color-mix(in srgb, var(--accent-base) 18%, white);
+  color: #9f1239;
+}
+.badge-soft-linear {
+  background: color-mix(in srgb-linear, var(--accent-base) 18%, white);
+  color: #9f1239;
+}
+
+/* color-mix() 미지원 브라우저 폴백 */
+@supports not (color: color-mix(in srgb, white, black)) {
+  .badge-muted,
+  .badge-soft,
+  .badge-soft-linear {
+    background: var(--accent-base);
+    color: #f9fafb;
+  }
+}</code></pre>
+          <div class="copy-row">
+            <button class="copy-btn" data-copy="#mix-code">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 실무 적용 패턴 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">08 · Practical Patterns</span>
+          <h2>실무 적용을 위한 토큰/컴포넌트 패턴</h2>
+          <p>
+            아래 패턴은 “디자인 토큰 → 컴포넌트 → 폴백” 흐름을 기준으로 정리한
+            최소 실무형 템플릿입니다. 팀의 토큰 구조에 맞춰 이름만 바꿔 적용하세요.
+          </p>
+
+          <h3>1) 토큰 레이어링(Foundation → Semantic → Component)</h3>
+          <pre><code>:root {
+  /* Foundation */
+  --color-blue-600: #2563eb;
+  --color-pink-500: #ec4899;
+  --color-gray-900: #0f172a;
+  --color-gray-100: #f5f5f5;
+
+  /* Semantic */
+  --color-brand: var(--color-blue-600);
+  --color-accent: var(--color-pink-500);
+  --surface: var(--color-gray-100);
+  --text: var(--color-gray-900);
+
+  /* Component */
+  --btn-primary-bg: var(--color-brand);
+  --btn-primary-text: #ffffff;
+}</code></pre>
+
+          <h3>1-1) 토큰 네이밍 규칙 예시</h3>
+          <ul class="change-list">
+            <li>Foundation: <code>--color-{hue}-{step}</code> (예: <code>--color-blue-600</code>)</li>
+            <li>Semantic: <code>--color-{role}</code> (예: <code>--color-brand</code>, <code>--color-danger</code>)</li>
+            <li>Component: <code>--{component}-{part}-{state}</code> (예: <code>--btn-primary-bg</code>)</li>
+            <li>State: <code>--{component}-{part}-{state}</code>에 상태 키워드 통일 (예: <code>--btn-primary-bg-hover</code>, <code>--btn-primary-bg-pressed</code>, <code>--btn-primary-bg-disabled</code>)</li>
+          </ul>
+
+          <h3>2) 컴포넌트 적용 규칙</h3>
+          <ul class="change-list">
+            <li>컴포넌트는 반드시 Semantic/Component 토큰만 사용 (Foundation 직접 참조 금지).</li>
+            <li>상태값(hover/active/disabled)은 <code>relative color</code> 또는 <code>color-mix()</code>로 파생.</li>
+            <li>텍스트 대비가 필요한 곳은 OKLCH 기반으로 먼저 맞추고 HEX 폴백을 둠.</li>
+          </ul>
+          <pre><code>/* Button */
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+.btn-primary:hover {
+  background: oklch(from var(--btn-primary-bg) calc(l + 0.06) c h);
+}</code></pre>
+
+          <h3>3) 폴백 전략 (순서가 중요)</h3>
+          <pre><code>:root {
+  --brand: #2563eb;
+  --brand-oklch: #2563eb;
+}
+@supports (color: oklch(0 0 0)) {
+  :root { --brand-oklch: oklch(0.65 0.13 260); }
+}
+@supports (color: color(display-p3 0.33 0.54 0.96)) {
+  :root { --brand: color(display-p3 0.33 0.54 0.96); }
+}
+@media (prefers-color-scheme: dark) {
+  :root { --surface: #111827; --text: #e5e7eb; }
+}
+@supports (color: light-dark(white, black)) {
+  :root {
+    --surface: light-dark(#f5f5f5, #111827);
+    --text: light-dark(#0f172a, #e5e7eb);
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- 체크리스트 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">09 · Checklist</span>
+          <h2>실무 적용 전 확인</h2>
+          <ul class="checklist">
+            <li><input type="checkbox" id="chk-contrast" /> <label for="chk-contrast">버튼/텍스트 대비 4.5:1 이상 확인</label></li>
+            <li><input type="checkbox" id="chk-fallback" /> <label for="chk-fallback">HEX 폴백 + @supports/@media 추가</label></li>
+            <li><input type="checkbox" id="chk-token" /> <label for="chk-token">디자인 토큰 파일에 색 정의 반영</label></li>
+            <li><input type="checkbox" id="chk-p3" /> <label for="chk-p3">P3 지원/비지원 환경 모두 검증</label></li>
+            <li><input type="checkbox" id="chk-qa" /> <label for="chk-qa">실기기 Light/Dark + 대비 스냅샷 점검</label></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 대비 점검 도구 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">10 · Contrast Tools</span>
+          <h2>대비 점검 도구/계산</h2>
+          <ul class="change-list">
+            <li>빠른 계산: <a href="https://webaim.org/resources/contrastchecker/" target="_blank" rel="noreferrer">WebAIM Contrast Checker</a></li>
+            <li>브라우저 내 점검: Chrome DevTools → Lighthouse / Accessibility</li>
+            <li>디자인 단계: Figma 플러그인 “Contrast” 계열 도구 활용</li>
+          </ul>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>Sample Contrast Results</strong>
+              <small>Primary (#2563eb) / White → 5.17:1</small>
+              <small>Primary Strong (#1d4ed8) / White → 6.65:1</small>
+              <small>Accent (#ec4899) / White → 4.60:1</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 참고 링크 -->
+      <section>
+        <div class="section-card">
+          <span class="badge">11 · Reference</span>
+          <h2>더 보기</h2>
+          <div class="refs">
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb" target="_blank" rel="noreferrer">MDN · rgb()</a>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl" target="_blank" rel="noreferrer">MDN · hsl()</a>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark" target="_blank" rel="noreferrer">MDN · light-dark()</a>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch" target="_blank" rel="noreferrer">MDN · oklch()</a>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix" target="_blank" rel="noreferrer">MDN · color-mix()</a>
+            <a href="https://caniuse.com/" target="_blank" rel="noreferrer">Can I Use · 호환성 확인</a>
+          </div>
+        </div>
+      </section>
+
+          <footer class="footer-note">
+            <p>
+              ※ 이 파일은 개념이 아니라 “실제 마크업에서 어떻게 쓰는지”를 보여주는
+              샘플입니다.<br />
+              프로젝트에 적용할 때는 디자인 토큰 파일(예: <code>:root</code> 또는
+              <code>theme.css</code>)에 색 정의를 옮겨두고,<br />
+              컴포넌트별 CSS에서는 가능한 한
+              <strong>색 하드코딩 대신 토큰 + relative colour</strong> 조합으로
+              사용하는 것을 추천합니다.
+            </p>
+          </footer>
+        </div>
+        <aside class="control-panel" aria-label="가이드 제어 패널">
+          <h3>표시 옵션</h3>
+          <div class="controls">
+            <div class="control-group" role="group" aria-label="테마 전환">
+              <span class="control-label">테마</span>
+              <button class="control-btn" data-theme-option="auto" aria-pressed="true">
+                Auto
+              </button>
+              <button class="control-btn" data-theme-option="light" aria-pressed="false">
+                Light
+              </button>
+              <button class="control-btn" data-theme-option="dark" aria-pressed="false">
+                Dark
+              </button>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="control-group" role="group" aria-label="토큰 색상">
+              <span class="control-label">primary</span>
+              <input
+                class="control-input"
+                type="color"
+                id="picker-primary"
+                aria-label="primary color"
+                value="#2563eb"
+              />
+              <span class="control-label">accent</span>
+              <input
+                class="control-input"
+                type="color"
+                id="picker-accent"
+                aria-label="accent color"
+                value="#ec4899"
+              />
+            </div>
+          </div>
+        </aside>
+      </div>
+      <script>
+      (() => {
+        const body = document.body;
+        const themeButtons = document.querySelectorAll("[data-theme-option]");
+        const copyButtons = document.querySelectorAll(".copy-btn");
+        const pickerPrimary = document.getElementById("picker-primary");
+        const pickerAccent = document.getElementById("picker-accent");
+
+        const setPressed = (buttons, value) => {
+          buttons.forEach((btn) => {
+            const isActive = btn.dataset.themeOption === value;
+            btn.setAttribute("aria-pressed", String(isActive));
+          });
+        };
+
+        const setTheme = (value) => {
+          if (value === "auto") {
+            body.removeAttribute("data-theme");
+          } else {
+            body.dataset.theme = value;
+          }
+          setPressed(themeButtons, value);
+        };
+
+        themeButtons.forEach((btn) =>
+          btn.addEventListener("click", () => setTheme(btn.dataset.themeOption))
+        );
+        copyButtons.forEach((btn) =>
+          btn.addEventListener("click", async () => {
+            const target = document.querySelector(btn.dataset.copy);
+            if (!target) return;
+            await navigator.clipboard.writeText(target.innerText.trim());
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = "Copy"), 800);
+          })
+        );
+        pickerPrimary?.addEventListener("input", (e) => {
+          const value = e.target.value;
+          document.documentElement.style.setProperty("--primary-base", value);
+          document.documentElement.style.setProperty("--primary", value);
+        });
+        pickerAccent?.addEventListener("input", (e) => {
+          const value = e.target.value;
+          document.documentElement.style.setProperty("--accent-base", value);
+        });
+
+        /* 초기 상태 */
+        setTheme("auto");
+      })();
+    </script>
+  </body>
+</html>
