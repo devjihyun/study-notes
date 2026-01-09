@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Debounce Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; padding: 16px; }
+    input { width: 100%; padding: 12px; font-size: 16px; }
+    .box { margin-top: 12px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+    .muted { opacity: .7; }
+  </style>
+</head>
+<body>
+  <h2>Debounce Demo</h2>
+  <p class="muted">입력하면 즉시 값은 바뀌고, 디바운스 결과는 500ms 뒤에 반영돼요.</p>
+
+  <input id="q" placeholder="타이핑 해보세요..." />
+  <div class="box">즉시 값: <strong id="raw"></strong></div>
+  <div class="box">디바운스 값: <strong id="debounced"></strong></div>
+
+  <script>
+    function debounce(fn, delay = 300) {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    const input = document.querySelector("#q");
+    const raw = document.querySelector("#raw");
+    const debounced = document.querySelector("#debounced");
+
+    const updateDebounced = debounce((value) => {
+      debounced.textContent = value;
+    }, 500);
+
+    input.addEventListener("input", (e) => {
+      raw.textContent = e.target.value;
+      updateDebounced(e.target.value);
+    });
+  </script>
+</body>
+</html>
